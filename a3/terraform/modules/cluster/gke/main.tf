@@ -337,4 +337,5 @@ module "kubectl-apply" {
   ksa        = var.ksa
   gcp_sa     = local.node_service_account
   project_id = var.project_id
+  resource_prefix = var.resource_prefix
 }

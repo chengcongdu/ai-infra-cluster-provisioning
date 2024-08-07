@@ -77,6 +77,12 @@ variable "manifest_path" {
   }
 }
 
+variable "resource_prefix" {
+  description = "Arbitrary string with which all names of newly created resources will be prefixed."
+  type        = string
+  nullable    = false
+}
+
 variable "project_id" {
   description = "Name of the project to use for instantiating clusters."
   type        = string
