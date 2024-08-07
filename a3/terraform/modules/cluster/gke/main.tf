@@ -302,6 +302,15 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
   member  = "serviceAccount:${local.node_service_account}"
 }
 
+resource "null_resource" "enable_tcpx_in_workload" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+  provisioner "local-exec" {
+      command = "python ../../../scripts/enable_tcpx_in_workload.py --file ${var.user_workload_path} --nccl v3.1.9 --rxdm v2.0.12"
+  }
+}
+
 module "kubectl-apply" {
   source = "./kubectl-apply"
 
@@ -309,8 +318,14 @@ module "kubectl-apply" {
   daemonsets = {
     device_plugin = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/cmd/nvidia_gpu/device-plugin.yaml"
     nvidia_driver = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded-latest.yaml"
-    nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml"
+    nccl_plugin   = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml" #v3.1.9
+    nri_plugin    = "https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nri_device_injector/nri-device-injector.yaml"
   }
+  manifest_path = {
+    workload = replace(var.user_workload_path, ".yaml", "-tcpx.yaml")
+    configmap = "./sample-tcpx-workload/sample-configmap.yaml"
+  }
+
   enable     = var.ksa != null
   ksa        = var.ksa
   gcp_sa     = local.node_service_account

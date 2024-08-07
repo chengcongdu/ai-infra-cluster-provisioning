@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-sample-job
+spec:
+  parallelism: 2
+  completions: 2
+  completionMode: Indexed
+  template:
+    spec:
+      containers:
+      - name: nccl-test
+        image: us-docker.pkg.dev/gce-ai-infra/gpudirect-tcpx/nccl-plugin-gpudirecttcpx-dev:v3.1.9
+        imagePullPolicy: Always
+        command:
+          - /bin/sh
+          - -c
+          - |
+            service ssh restart;
+            sleep infinity;
+        env:
+          - name: LD_LIBRARY_PATH
+            value: /usr/local/nvidia/lib64
+        volumeMounts:
+          - name: config-volume
+            mountPath: /configs
+        resources:
+          limits:
+            nvidia.com/gpu: 8
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nccl-configmap
+            defaultMode: 0777
+      restartPolicy: Never
+  backoffLimit: 0
