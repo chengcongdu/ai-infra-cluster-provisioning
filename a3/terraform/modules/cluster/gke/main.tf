@@ -302,13 +302,20 @@ resource "google_project_iam_member" "node_service_account_monitoringViewer" {
   member  = "serviceAccount:${local.node_service_account}"
 }
 
+resource "null_resource" "install_dependencies" {
+  provisioner "local-exec" {
+      command = "pip3 install pyyaml argparse"
+  }
+}
+
 resource "null_resource" "enable_tcpx_in_workload" {
   triggers = {
     always_run = "${timestamp()}"
   }
   provisioner "local-exec" {
-      command = "python ../../../scripts/enable_tcpx_in_workload.py --file ${var.user_workload_path} --nccl v3.1.9 --rxdm v2.0.12"
+      command = "python3 ../../../scripts/enable_tcpx_in_workload.py --file ${var.user_workload_path} --nccl v3.1.9 --rxdm v2.0.12"
   }
+  depends_on = [ null_resource.install_dependencies ]
 }
 
 module "kubectl-apply" {
