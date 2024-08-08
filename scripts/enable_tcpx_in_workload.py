@@ -53,7 +53,7 @@ def main():
     updated_job = str(yaml.safe_dump(job_manifest, default_flow_style=False, width=1000, default_style="|", sort_keys=False)).replace("|-", "")
 
     new_file_name = args.file.replace(".yaml", "-tcpx.yaml")
-    with open("./"+new_file_name, "w", encoding="utf-8") as file:
+    with open(new_file_name, "w", encoding="utf-8") as file:
         file.write(updated_job)
 
     # Step 7: Provide instructions to the user

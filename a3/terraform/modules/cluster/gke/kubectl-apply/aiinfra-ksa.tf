@@ -136,8 +136,8 @@ resource "kubectl_manifest" "installer_network_param_set" {
   metadata:
     name: vpc${count.index}
   spec:
-    vpc: ${resource_prefix}-gpu-${count.index}
-    vpcSubnet: ${resource_prefix}-gpu-${count.index}
+    vpc: ${var.resource_prefix}-gpu-${count.index}
+    vpcSubnet: ${var.resource_prefix}-gpu-${count.index}
     deviceMode: NetDevice
   YAML
   wait_for_rollout = false
