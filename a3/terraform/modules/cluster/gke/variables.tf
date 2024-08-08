@@ -166,3 +166,9 @@ variable "resource_prefix" {
   type        = string
   nullable    = false
 }
+
+variable "user_workload_path" {
+  description = "The path to the user workload, this should point to the kubernetes job manifest that user want to have the TCPX sidecar injected."
+  type        = string
+  default     = "./sample-tcpx-workload/sample-job.yaml"
+}

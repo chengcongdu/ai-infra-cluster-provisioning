@@ -66,6 +66,23 @@ variable "gcp_sa" {
   nullable    = false
 }
 
+variable "manifest_path" {
+  description = "Path to the manifest file to install with kubectl apply"
+  type        = map(string)
+  nullable    = false
+
+  validation {
+    condition     = length(var.manifest_path) != 0
+    error_message = "must specify at least one manifest path"
+  }
+}
+
+variable "resource_prefix" {
+  description = "Arbitrary string with which all names of newly created resources will be prefixed."
+  type        = string
+  nullable    = false
+}
+
 variable "project_id" {
   description = "Name of the project to use for instantiating clusters."
   type        = string

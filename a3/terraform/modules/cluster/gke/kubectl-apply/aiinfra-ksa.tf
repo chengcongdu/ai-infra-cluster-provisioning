@@ -90,3 +90,57 @@ resource "kubectl_manifest" "installer_daemonsets" {
 
   depends_on = [resource.google_service_account_iam_binding.default-workload-identity]
 }
+
+resource "kubectl_manifest" "installer_workload" {
+  for_each = var.enable ? var.manifest_path : {}
+
+  yaml_body        = fileexists(var.manifest_path[each.key]) ? file(var.manifest_path[each.key]) : <<YAML
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: place-holder-configmap
+data:
+  placeholder: "true"
+YAML
+  wait_for_rollout = false
+
+  depends_on = [resource.google_service_account_iam_binding.default-workload-identity]
+}
+
+resource "kubectl_manifest" "installer_network" {
+  count = var.enable ? 4 : 0
+
+  yaml_body        = <<YAML
+  apiVersion: networking.gke.io/v1
+  kind: Network
+  metadata:
+    name: vpc${count.index}
+  spec:
+    parametersRef:
+      group: networking.gke.io
+      kind: GKENetworkParamSet
+      name: vpc${count.index}
+    type: Device
+  YAML
+  wait_for_rollout = false
+
+  depends_on = [resource.google_service_account_iam_binding.default-workload-identity]
+}
+
+resource "kubectl_manifest" "installer_network_param_set" {
+  count = var.enable ? 4 : 0
+
+  yaml_body        = <<YAML
+  apiVersion: networking.gke.io/v1
+  kind: GKENetworkParamSet
+  metadata:
+    name: vpc${count.index}
+  spec:
+    vpc: ${var.resource_prefix}-gpu-${count.index}
+    vpcSubnet: ${var.resource_prefix}-gpu-${count.index}
+    deviceMode: NetDevice
+  YAML
+  wait_for_rollout = false
+
+  depends_on = [resource.google_service_account_iam_binding.default-workload-identity]
+}
