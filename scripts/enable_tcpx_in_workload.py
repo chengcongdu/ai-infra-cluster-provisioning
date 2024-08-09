@@ -4,52 +4,35 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description="TCPX Job Manifest Generator")
     parser.add_argument("-f", "--file", required=True, help="Path to your job template YAML file")
-    parser.add_argument("-n", "--nccl", required=True, help="NCCL plugin version")
     parser.add_argument("-r", "--rxdm", required=True, help="RxDM version")
-    # parser.add_argument("-y", "--yes", action="store_true", help="Auto-consent to continue even if version combination is not listed (use with caution)")
 
     args = parser.parse_args()
 
-    # Step 1: Get the YAML file from the user
+    # Get the YAML file from the user
     if not args.file:
         args.file = input("Please provide the path to your job template YAML file: ")
-        
-    # Step 2: Open the compatibility list link
-    # compatibility_link = "https://docs.google.com/document/d/1D5umT4-WDuNnYf3ieQ5SfLdmvGRPBQGLB662udzwz8I"  # Replace with the actual link
-    # print(f"Please check this link for supported version combinations for NCCL plugin and RxDM: {compatibility_link}")
 
-    # Step 3: Get user consent
-    # if not args.yes:  # Don't ask for consent if -y is provided
-    #     compatibility_link = "https://docs.google.com/document/d/1D5umT4-WDuNnYf3ieQ5SfLdmvGRPBQGLB662udzwz8I"
-    #     print(f"Please check this link for supported version combinations for NCCL plugin and RxDM: {compatibility_link}")
-    #     consent = input("Version combination not listed in the link might impact performance, please consent to continue (yes/no): ")
-    #     if consent.lower() != "yes" and consent.lower() != "y":
-    #         print("Exiting the script. Please choose supported versions.")
-    #         return
-
-    # Step 4: Get component versions from user
-    if not args.nccl:
-        args.nccl = input("Enter the NCCL plugin version: ")
+    # Get component versions from user
     if not args.rxdm:
         args.rxdm = input("Enter the RxDM version: ")
 
-    # Step 5: Load and modify the YAML
+    # Load and modify the YAML
     with open(args.file, "r") as file:
         job_manifest = yaml.safe_load(file)
 
     # Update annotations
     add_annotations(job_manifest)
 
-    # # Update volumes
+    # Update volumes
     add_volumes(job_manifest)
 
-    # # Add tcpx-daemon container
+    # Add tcpx-daemon container
     add_tcpx_daemon_container(job_manifest, args.rxdm)
 
-    # # Update environment variables and volumeMounts for GPU containers
+    # Update environment variables and volumeMounts for GPU containers
     update_gpu_containers(job_manifest)
 
-    # Step 6: Generate the new YAML file
+    # Generate the new YAML file
     updated_job = str(yaml.safe_dump(job_manifest, default_flow_style=False, width=1000, default_style="|", sort_keys=False)).replace("|-", "")
 
     new_file_name = args.file.replace(".yaml", "-tcpx.yaml")
@@ -57,14 +40,8 @@ def main():
         file.write(updated_job)
 
     # Step 7: Provide instructions to the user
-    print("\nPlease follow the below steps to complete enabling TCPX:")
-    print("1. Deploy NCCL plugin component if it haven't been deploy (update version):")
-    print("   kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/gpudirect-tcpx/nccl-tcpx-installer.yaml")
-    print("   (Replace 'nccl-tcpx-installer.yaml' with the correct version)")
-    print("2. Deploy NRI device injector plugin if it haven't been deploy :")
-    print("   kubectl apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nri_device_injector/nri-device-injector.yaml")
-    print("3. Deploy your workload with the updated manifest:", new_file_name)
-    print("4. Verify your workload is working as expected")
+    print("\nA new manifest had been generated and updated to have TCPX enabled based on the provided worklad,")
+    print("It can be found in the same path as the original workload file with name ending \"-tcpx\"")
 
 def add_annotations(job_manifest):
     annotations = {

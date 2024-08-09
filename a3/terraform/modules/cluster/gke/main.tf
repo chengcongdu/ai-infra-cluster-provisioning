@@ -313,7 +313,7 @@ resource "null_resource" "enable_tcpx_in_workload" {
     always_run = "${timestamp()}"
   }
   provisioner "local-exec" {
-      command = "python3 ../../../scripts/enable_tcpx_in_workload.py --file ${var.user_workload_path} --nccl v3.1.9 --rxdm v2.0.12"
+      command = "python3 ../../../scripts/enable_tcpx_in_workload.py --file ${var.user_workload_path} --rxdm v2.0.12"
   }
   depends_on = [ null_resource.install_dependencies ]
 }
